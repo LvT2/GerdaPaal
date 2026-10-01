@@ -13,15 +13,23 @@
 
 MD_Parola dp = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
-const char* ssid = WIFI_SSID;
-const char* wifiPassword = WIFI_PASSWORD;
+// ===========================================================| Configuration
 
-bool httpPasswordEnabled = true; // true of false
-const char* httpPassword = HTTP_PASSWORD; // POST request must start with the specified password.
+const char* ssid = WIFI_SSID;                 // wifi name
+const char* wifiPassword = WIFI_PASSWORD;     // wifi password
 
+bool httpPasswordEnabled = true;              // true | false, whether a password is enabled for a http POST request.
+const char* httpPassword = HTTP_PASSWORD;     // POST request must start with the specified password.
+const char* mdnsHostname = "gerdapaal";       // the .local extension gets appended automatically.
+
+// ===========================================================| end Configuration
+// ===========================================================| Global vars
 ESP8266WebServer server(80);
 
 String lines[10];
+
+// ===========================================================| end global vars
+// ===========================================================| Functions
 
 void handleNotFound() {
   String message = "File Not Found\n\n";
@@ -55,6 +63,8 @@ void handleNewline(String newlineMess) {
     if (newline == -1) {
       // Last line
       lines[lineCount] = newlineMess.substring(start);
+      Serial.println(lineCount);
+      Serial.println(lines[lineCount]);
       lineCount++;
       break;
     }
@@ -105,6 +115,8 @@ void handlePost() {
   }
 }
 
+// ===========================================================| end Functions
+// ===========================================================| Setup
 void setup(void) {
   dp.begin();
   dp.displayClear();
@@ -126,10 +138,10 @@ void setup(void) {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  static  String ipAddr = "connected to: " + WiFi.localIP().toString();
+  static  String ipAddr = "IP address: " + WiFi.localIP().toString();
   dp.displayText(ipAddr.c_str(), PA_CENTER, 40, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
 
-  if (MDNS.begin("gerdapaal")) { Serial.println("MDNS responder started"); }
+  if (MDNS.begin(mdnsHostname)) { Serial.println("MDNS responder started"); }
 
   server.onNotFound(handleNotFound);
 
@@ -139,10 +151,10 @@ void setup(void) {
 
   server.begin();
   Serial.println("HTTP server started");
-
-  dp.begin();
-  dp.displayClear();
 }
+
+// ===========================================================| end Setup
+// ===========================================================| Loop
 
 void loop(void) {
   server.handleClient();
