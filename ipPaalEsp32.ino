@@ -1,15 +1,15 @@
 #include "secrets.h"
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <WiFiClient.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
 #include <MD_Parola.h>
 #include <MD_MAX72xx.h>
 #include <SPI.h>
 
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define MAX_DEVICES 8
-#define CS_PIN D8
+#define CS_PIN D0
 
 MD_Parola dp = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
@@ -24,7 +24,7 @@ const char* mdnsHostname = "gerdapaal";       // the .local extension gets appen
 
 // ===========================================================| end Configuration
 // ===========================================================| Global vars
-ESP8266WebServer server(80);
+WebServer server(80);
 
 String parsedNewlines[10];
 bool cycleNewlines = false;
@@ -170,7 +170,8 @@ void setup(void) {
 
   server.on("/input", handlePost);
 
-  server.collectHeaders("authorization");
+  const char* headerKeys[] = {"Authorization"};
+  server.collectHeaders(headerKeys, 1);
 
   server.begin();
   Serial.println("HTTP server started");
@@ -181,13 +182,12 @@ void setup(void) {
 
 void loop(void) {
   server.handleClient();
-  MDNS.update();
-
-  if (cycleNewlines) {
-    nextNewline();
-  }
 
   if (dp.displayAnimate()) {
     dp.displayReset();
   }
+
+    //if (cycleNewlines) {
+  //  nextNewline();
+  //}
 }
