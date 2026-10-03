@@ -26,7 +26,10 @@ const char* mdnsHostname = "gerdapaal";       // the .local extension gets appen
 // ===========================================================| Global vars
 ESP8266WebServer server(80);
 
-String lines[10];
+String parsedNewlines[10];
+bool cycleNewlines = false;
+int currentAnimatingNewline = 0; // change to another data type?
+int receivedNewlineCount = 0;
 
 // ===========================================================| end global vars
 // ===========================================================| Functions
@@ -44,7 +47,26 @@ void handleNotFound() {
   server.send(404, "text/plain", message);
 }
 
+void nextNewline() {
+  if (currentAnimatingNewline >= receivedNewlineCount) {
+    currentAnimatingNewline = 0;
+  }
+
+  if (currentAnimatingNewline == 0) {
+    dp.displayText(parsedNewlines[currentAnimatingNewline].c_str(), PA_CENTER, 30, 1000, PA_OPENING_CURSOR, PA_SCROLL_UP);
+
+  } else if (currentAnimatingNewline >= receivedNewlineCount - 1) {
+    dp.displayText(parsedNewlines[currentAnimatingNewline].c_str(), PA_CENTER, 30, 1000, PA_SCROLL_UP, PA_CLOSING_CURSOR);
+
+  } else {
+    dp.displayText(parsedNewlines[currentAnimatingNewline].c_str(), PA_CENTER, 30, 1000, PA_SCROLL_UP, PA_SCROLL_UP);
+
+  }
+  currentAnimatingNewline++;
+}
+
 void handleNewline(String newlineMess) {
+  
   Serial.print("Message: [");
   Serial.print(newlineMess);
   Serial.println("]");
@@ -53,33 +75,32 @@ void handleNewline(String newlineMess) {
   Serial.println(newlineMess.length());
 
   // add a warning if more than 10 newlines are sent in?
-  int lineCount = 0;
+  receivedNewlineCount = 0;
   
   int start = 0;
 
-  while (lineCount < 10) {
+  currentAnimatingNewline = 0;
+
+  while (receivedNewlineCount < 10) {
     int newline = newlineMess.indexOf('\n', start);
 
     if (newline == -1) {
       // Last line
-      lines[lineCount] = newlineMess.substring(start);
-      Serial.println(lineCount);
-      Serial.println(lines[lineCount]);
-      lineCount++;
+      parsedNewlines[receivedNewlineCount] = newlineMess.substring(start);
+      Serial.println(receivedNewlineCount);
+      Serial.println(parsedNewlines[receivedNewlineCount]);
+      receivedNewlineCount++;
+      cycleNewlines = true;
       break;
     }
 
-    lines[lineCount] = newlineMess.substring(start, newline); // WAT zijn enumerations?
-    Serial.println(lineCount);
-    Serial.println(lines[lineCount]);
-    lineCount++;
+    parsedNewlines[receivedNewlineCount] = newlineMess.substring(start, newline); // WAT zijn enumerations?
+    Serial.println(receivedNewlineCount);
+    Serial.println(parsedNewlines[receivedNewlineCount]);
+    receivedNewlineCount++;
 
     start = newline + 1;
   }
-
-  dp.displayText(lines[0].c_str(), PA_CENTER, 30, 1000, PA_OPENING_CURSOR, PA_SCROLL_UP);
-  dp.displayText(lines[1].c_str(), PA_CENTER, 30, 1000, PA_SCROLL_UP, PA_CLOSING_CURSOR);
-
 }
 
 void handlePost() {
@@ -97,6 +118,8 @@ void handlePost() {
         return;
       }
     }
+
+    cycleNewlines = false;
 
     if (server.hasArg("type")) {
       String type = server.arg("type");
@@ -118,9 +141,6 @@ void handlePost() {
 // ===========================================================| end Functions
 // ===========================================================| Setup
 void setup(void) {
-  dp.begin();
-  dp.displayClear();
-
   Serial.begin(9600);
 
   WiFi.mode(WIFI_STA);
@@ -137,6 +157,9 @@ void setup(void) {
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+
+  dp.begin();
+  dp.displayClear();
 
   static  String ipAddr = "IP address: " + WiFi.localIP().toString();
   dp.displayText(ipAddr.c_str(), PA_CENTER, 40, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
@@ -159,6 +182,10 @@ void setup(void) {
 void loop(void) {
   server.handleClient();
   MDNS.update();
+
+  if (cycleNewlines) {
+    nextNewline();
+  }
 
   if (dp.displayAnimate()) {
     dp.displayReset();
