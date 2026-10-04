@@ -111,7 +111,7 @@ void handlePost() {
 
     static String message;
     message = server.arg("plain");
-
+    Serial.println(message);
     if (httpPasswordEnabled) {
       if (server.header("authorization") != httpPassword) {
         server.send(401, "text/plain", "pass incorrect, you POSTed: " + message);
@@ -185,9 +185,9 @@ void loop(void) {
 
   if (dp.displayAnimate()) {
     dp.displayReset();
+    
+    if (cycleNewlines) {
+      nextNewline();
+    }
   }
-
-    //if (cycleNewlines) {
-  //  nextNewline();
-  //}
 }

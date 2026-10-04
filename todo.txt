@@ -1,0 +1,9 @@
+U+2713	✓	Check mark
+U+2714	✔	Heavy check mark
+U+2717	✗	Ballot X
+U+2718	✘	Heavy ballot X
+U+261x x=0 ☐, x=1 ☑, x=2 ☒.
+
+
+☐ add warning if more than 10 newlines are sent in
+☐ add a help screen at POST/GET / (root) that shows how to use the "api".
