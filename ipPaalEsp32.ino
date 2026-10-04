@@ -56,7 +56,7 @@ void nextNewline() {
     dp.displayText(parsedNewlines[currentAnimatingNewline].c_str(), PA_CENTER, 30, 1000, PA_OPENING_CURSOR, PA_SCROLL_UP);
 
   } else if (currentAnimatingNewline >= receivedNewlineCount - 1) {
-    dp.displayText(parsedNewlines[currentAnimatingNewline].c_str(), PA_CENTER, 30, 1000, PA_SCROLL_UP, PA_CLOSING_CURSOR);
+    dp.displayText(parsedNewlines[currentAnimatingNewline].c_str(), PA_CENTER, 30, 1000, PA_SCROLL_UP, PA_OPENING_CURSOR);
 
   } else {
     dp.displayText(parsedNewlines[currentAnimatingNewline].c_str(), PA_CENTER, 30, 1000, PA_SCROLL_UP, PA_SCROLL_UP);
@@ -185,7 +185,7 @@ void loop(void) {
 
   if (dp.displayAnimate()) {
     dp.displayReset();
-    
+
     if (cycleNewlines) {
       nextNewline();
     }
