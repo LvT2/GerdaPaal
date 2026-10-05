@@ -9,3 +9,4 @@ U+261x x=0 ☐, x=1 ☑, x=2 ☒.
 ☐ add a help screen at POST/GET / (root) that shows how to use the "api".
 ☐ make code for message buffer/queue so if you post a new message the one currently animating does not get cut off
 ☑ feature: make a diffirent type of animation instead of scrolling side ways it scrolls up. each line is a newline in the POSTed message. to use this feature set the query parameter in the url to ?type=newline.
+☐ add a (optional) pause between the end of the last newline and the first newline in the list.
